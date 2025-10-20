@@ -976,7 +976,8 @@ impl ListHeader {
                 }
 
                 _ => {
-                    unreachable!("{} not supported", s[i]);
+                    break;
+                    // unreachable!("{} not supported", s[i]);
                 }
             }
         }
