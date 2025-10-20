@@ -838,25 +838,25 @@ impl<T: SetType> NormalListResult<T> {
                     self.typ = fields[1].trim().to_string();
                 }
                 "Revision" => {
-                    self.revision = fields[1].trim().parse()?;
+                    self.revision = fields[1].trim().parse().unwrap_or(0);
                 }
                 "Header" => {
                     self.header = ListHeader::from_str(fields[1].trim());
                 }
                 "Size in memory" => {
-                    self.size_in_memory = fields[1].trim().parse()?;
+                    self.size_in_memory = fields[1].trim().parse().unwrap_or(0);
                 }
                 "References" => {
-                    self.references = fields[1].trim().parse()?;
+                    self.references = fields[1].trim().parse().unwrap_or(0);
                 }
                 "Number of entries" => {
-                    self.entry_size = fields[1].trim().parse()?;
+                    self.entry_size = fields[1].trim().parse().unwrap_or(0);
                 }
                 "Members" => {
                     self.items = Some(Vec::new());
                 }
                 _ => {
-                    unreachable!("unexpected {}", fields[0])
+                    // unreachable!("unexpected {}", fields[0])
                 }
             }
         } else {
@@ -871,23 +871,32 @@ impl<T: SetType> NormalListResult<T> {
                 while i < fields.len() {
                     match fields[i] {
                         "timeout" => {
-                            options.push(AddOption::Timeout(fields[i + 1].parse()?));
+                            options.push(AddOption::Timeout(fields[i + 1].parse().unwrap_or(0)));
                         }
                         "packets" => {
-                            options.push(AddOption::Packets(fields[i + 1].parse()?));
+                            options.push(AddOption::Packets(fields[i + 1].parse().unwrap_or(0)));
                         }
                         "bytes" => {
-                            options.push(AddOption::Bytes(fields[i + 1].trim().replace("\0", "").parse()?));
+                            options.push(AddOption::Bytes(
+                                fields[i + 1].trim().replace("\0", "").parse().unwrap_or(0),
+                            ));
                         }
                         "comment" => {
                             options.push(AddOption::Comment(fields[i + 1].to_string()));
                         }
                         "skbmark" => {
                             let values: Vec<_> = fields[i + 1].split('/').collect();
-                            let v0 =
-                                u32::from_str_radix(values[0].strip_prefix("0x").unwrap(), 16)?;
+                            let v0 = u32::from_str_radix(
+                                values[0].strip_prefix("0x").unwrap_or("00"),
+                                16,
+                            )
+                            .unwrap_or(0);
                             let v1 = if values.len() > 1 {
-                                u32::from_str_radix(values[1].strip_prefix("0x").unwrap(), 16)?
+                                u32::from_str_radix(
+                                    values[1].strip_prefix("0x").unwrap_or("00"),
+                                    16,
+                                )
+                                .unwrap_or(0)
                             } else {
                                 u32::MAX
                             };
@@ -895,12 +904,12 @@ impl<T: SetType> NormalListResult<T> {
                         }
                         "skbprio" => {
                             let values: Vec<_> = fields[i + 1].split(':').collect();
-                            let v0 = u16::from_str_radix(values[0], 16)?;
-                            let v1 = u16::from_str_radix(values[1], 16)?;
+                            let v0 = u16::from_str_radix(values[0], 16).unwrap_or(0);
+                            let v1 = u16::from_str_radix(values[1], 16).unwrap_or(0);
                             options.push(AddOption::SkbPrio(v0, v1));
                         }
                         "skbqueue" => {
-                            options.push(AddOption::SkbQueue(fields[i + 1].parse()?));
+                            options.push(AddOption::SkbQueue(fields[i + 1].parse().unwrap_or(0)));
                         }
                         "nomatch" => {
                             options.push(AddOption::Nomatch);
@@ -908,7 +917,8 @@ impl<T: SetType> NormalListResult<T> {
                             continue;
                         }
                         _ => {
-                            unreachable!("{} not supported", fields[i]);
+                            // unreachable!("{} not supported", fields[i]);
+                            break;
                         }
                     }
                     i += 2
@@ -930,7 +940,7 @@ pub struct ListHeader {
     counters: bool,
     comment: bool,
     skbinfo: bool,
-    initval: Option<u32>
+    initval: Option<u32>,
 }
 
 impl ListHeader {
@@ -945,15 +955,15 @@ impl ListHeader {
                     i += 2;
                 }
                 "hashsize" => {
-                    header.hash_size = s[i + 1].parse().unwrap();
+                    header.hash_size = s[i + 1].parse().unwrap_or(0);
                     i += 2;
                 }
                 "bucketsize" => {
-                    header.bucket_size = Some(s[i + 1].parse().unwrap());
+                    header.bucket_size = Some(s[i + 1].parse().unwrap_or(0));
                     i += 2;
-                },
+                }
                 "maxelem" => {
-                    header.max_elem = s[i + 1].parse().unwrap();
+                    header.max_elem = s[i + 1].parse().unwrap_or(0);
                     i += 2;
                 }
                 "counters" => {
@@ -970,14 +980,14 @@ impl ListHeader {
                 }
                 "initval" => {
                     if let Some(initval) = s[i + 1].strip_prefix("0x") {
-                        header.initval = Some(u32::from_str_radix(initval, 16).unwrap());
+                        header.initval = Some(u32::from_str_radix(initval, 16).unwrap_or(0));
                     }
                     i += 2;
                 }
 
                 _ => {
-                    break;
                     // unreachable!("{} not supported", s[i]);
+                    break;
                 }
             }
         }
