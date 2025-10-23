@@ -3,11 +3,11 @@ use std::env;
 fn main() {
     println!("cargo:rustc-link-lib=ipset");
     println!("cargo:rerun-if-changed=wrapper.c");
-    println!("cargo:rerun-if-changed=wrapper.h");
+    // println!("cargo:rerun-if-changed=wrapper.h");
 
     cc::Build::new().file("wrapper.c").compile("aux");
 
-    let bindings = bindgen::Builder::default()
+    /* let bindings = bindgen::Builder::default()
         .header("wrapper.h")
         .generate()
         .expect("Unable to generate bindings");
@@ -15,5 +15,5 @@ fn main() {
     out_file.push_str("/binding.rs");
     bindings
         .write_to_file(out_file)
-        .expect("Unable to write binding.rs");
+        .expect("Unable to write binding.rs"); */
 }
