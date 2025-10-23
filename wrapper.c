@@ -2,12 +2,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
-#include <libipset/ipset.h>
+// #include <libipset/ipset.h>
 
 extern void ipset_out(void *p, const char *output, uint32_t len, uint32_t cap);
 
-int print_out(struct ipset_session *session, void *p, const char *fmt, ...) {
-    (void) session;
+int print_out(void *_session, void *p, const char *fmt, ...) {
     va_list args;
     int length = 1024;
     int running = 1;
